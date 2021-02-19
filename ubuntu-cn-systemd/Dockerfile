@@ -7,5 +7,16 @@ RUN apt update \
   && DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt install -y systemd \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf /tmp/* /var/tmp/* \
-  && rm /root/preseed.cfg
+  && rm /root/preseed.cfg \
+  && cd /lib/systemd/system/sysinit.target.wants/ \
+  && ls | grep -v systemd-tmpfiles-setup | xargs rm -f $1 \
+  && rm -f /lib/systemd/system/multi-user.target.wants/* \
+    /etc/systemd/system/*.wants/* \
+    /lib/systemd/system/local-fs.target.wants/* \
+    /lib/systemd/system/sockets.target.wants/*udev* \
+    /lib/systemd/system/sockets.target.wants/*initctl* \
+    /lib/systemd/system/basic.target.wants/* \
+    /lib/systemd/system/anaconda.target.wants/* \
+    /lib/systemd/system/plymouth* \
+    /lib/systemd/system/systemd-update-utmp*
 ENTRYPOINT ["/bin/systemd"]
