@@ -4,4 +4,3 @@ RUN apt update \
     && rm -rf /var/lib/apt/lists/* \
     && wget -qO- https://gitee.com/Suwingser/MCSManager-installer/raw/master/install.sh | bash \
     && systemctl enable mcsm
-
