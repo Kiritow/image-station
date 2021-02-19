@@ -1,8 +1,15 @@
 # Stage 0
 FROM ubuntu-cn:latest
-RUN apt update && apt install -y curl && rm -rf /var/lib/apt/lists/*
+RUN apt update \
+    && apt install -y curl jq \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* /var/tmp/*
 RUN cd /root \
-    && curl -vL https://github.com/fatedier/frp/releases/download/v0.35.1/frp_0.35.1_linux_amd64.tar.gz -o frp.tgz \
+    && LATEST_TAG=`curl --silent "https://api.github.com/repos/fatedier/frp/releases/latest" | jq -r .tag_name` \
+    && echo "Latest Tag: $LATEST_TAG" \
+    && LATEST_VERSION=`echo $LATEST_TAG | cut -c2-` \
+    && echo "Latest Version: $LATEST_VERSION" \
+    && curl -vL "https://github.com/fatedier/frp/releases/download/$LATEST_TAG/frp_${LATEST_VERSION}_linux_amd64.tar.gz" -o frp.tgz \
     && mkdir temp \
     && tar -xzvf frp.tgz --strip-component=1 -C temp \
     && mkdir frp_client \
