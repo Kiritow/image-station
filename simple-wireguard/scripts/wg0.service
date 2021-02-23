@@ -1,0 +1,17 @@
+[Unit]
+Description=Simple WireGuard Service
+After=network-online.target nss-lookup.target
+Wants=network-online.target nss-lookup.target
+Documentation=man:wg(8)
+Documentation=https://www.wireguard.com/
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/bash /opt/wireguard/wg-start.sh
+ExecStop=/bin/bash /opt/wireguard/wg-stop.sh
+ExecReload=/bin/bash /opt/wireguard/wg-reload.sh
+Environment=WG_ENDPOINT_RESOLUTION_RETRIES=infinity
+
+[Install]
+WantedBy=multi-user.target
