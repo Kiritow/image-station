@@ -43,6 +43,11 @@ int main(int argc, char *argv[])
         case 'f':
         {
             FILE *fp = fopen(optarg, "r");
+            if(!fp)
+            {
+                perror("fopen");
+                exit(2);
+            }
             fscanf(fp, "%s", token);
             fclose(fp);
             enableToken = 1;
@@ -56,9 +61,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (optind + 5 > argc)
+    if (optind + 6 > argc)
     {
-        fprintf(stderr, "not enough arguments, 5 needed, got %d\n", argc - optind);
+        fprintf(stderr, "not enough arguments, 6 needed, got %d\n", argc - optind);
         exit(2);
     }
 
@@ -82,6 +87,11 @@ int main(int argc, char *argv[])
     }
 
     FILE *fp = fopen("/tmp/frpc.ini", "w");
+    if(!fp)
+    {
+        perror("fopen");
+        exit(2);
+    }
     fprintf(fp, "[common]\nserver_addr = %s\nserver_port = %d\n", serverIP, serverPort);
     if (enableToken)
     {
@@ -113,7 +123,7 @@ int main(int argc, char *argv[])
     if (!noExec)
     {
         fprintf(stderr, "Loading frpc...\n");
-        char *callArgs[] = {"The Frp Client", "-c", "/tmp/frpc.ini", NULL};
+        char* const callArgs[] = {"The Frp Client", "-c", "/tmp/frpc.ini", NULL};
         if (execv("/opt/frp/frpc", callArgs) < 0)
         {
             perror("execv");
