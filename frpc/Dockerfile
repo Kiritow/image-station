@@ -14,10 +14,10 @@ RUN cd /root \
     && tar -xzvf frp.tgz --strip-component=1 -C temp \
     && mkdir frp_client \
     && cp temp/frpc frp_client/frpc
-COPY main.c /root/temp/
+COPY launcher.c /root/temp/
 RUN cd /root/temp \
-    && gcc main.c -o main \
-    && mv main /root/frp_client/launcher \
+    && gcc launcher.c -o launcher \
+    && mv launcher /root/frp_client/ \
     && chmod +x /root/frp_client/frpc \
     && chmod +x /root/frp_client/launcher
 

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// start [-ezkn] [-p PoolSize] [-f TokenFilename] ServerIP ServerPort ProxyName ProxyType LocalPort RemotePort
+// launcher [-ezkn] [-p PoolSize] [-f TokenFilename] ServerIP ServerPort ProxyName ProxyType LocalPort RemotePort
 int main(int argc, char *argv[])
 {
     int ch = 0;
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     if (!noExec)
     {
         fprintf(stderr, "Loading frpc...\n");
-        char* const callArgs[] = {"The Frp Client", "-c", "/tmp/frpc.ini", NULL};
+        char* const callArgs[] = {"frpc", "-c", "/tmp/frpc.ini", NULL};
         if (execv("/opt/frp/frpc", callArgs) < 0)
         {
             perror("execv");
