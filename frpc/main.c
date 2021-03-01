@@ -1,0 +1,124 @@
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+// start [-ezkn] [-p PoolSize] [-f TokenFilename] ServerIP ServerPort ProxyName ProxyType LocalPort RemotePort
+int main(int argc, char *argv[])
+{
+    int ch = 0;
+    int noExec = 0;
+    int enableCompression = 0;
+    int enableEncryption = 0;
+    int enableKCP = 0;
+    int poolSize = 0;
+    const char *serverIP = NULL;
+    int serverPort = 0;
+    const char *proxyName = NULL;
+    const char *proxyType = NULL;
+    int localPort = 0;
+    int remotePort = 0;
+    int enableToken = 0;
+    char token[256] = {0};
+
+    while ((ch = getopt(argc, argv, "ezknp:f:")) != -1)
+    {
+        switch (ch)
+        {
+        case 'e':
+            enableEncryption = 1;
+            break;
+        case 'z':
+            enableCompression = 1;
+            break;
+        case 'k':
+            enableKCP = 1;
+            break;
+        case 'p':
+            if (sscanf(optarg, "%d", &poolSize) < 1)
+            {
+                fprintf(stderr, "Cannot parse pool size\n");
+                exit(2);
+            }
+            break;
+        case 'f':
+        {
+            FILE *fp = fopen(optarg, "r");
+            fscanf(fp, "%s", token);
+            fclose(fp);
+            enableToken = 1;
+            break;
+        }
+        case 'n':
+            noExec = 1;
+            break;
+        case '?':
+            exit(2);
+        }
+    }
+
+    if (optind + 5 > argc)
+    {
+        fprintf(stderr, "not enough arguments, 5 needed, got %d\n", argc - optind);
+        exit(2);
+    }
+
+    serverIP = argv[optind];
+    if (sscanf(argv[optind + 1], "%d", &serverPort) < 1)
+    {
+        fprintf(stderr, "Cannot parse server port\n");
+        exit(2);
+    }
+    proxyName = argv[optind + 2];
+    proxyType = argv[optind + 3];
+    if (sscanf(argv[optind + 4], "%d", &localPort) < 1)
+    {
+        fprintf(stderr, "Cannot parse local port\n");
+        exit(2);
+    }
+    if (sscanf(argv[optind + 5], "%d", &remotePort) < 1)
+    {
+        fprintf(stderr, "Cannot parse remote port\n");
+        exit(2);
+    }
+
+    FILE *fp = fopen("/tmp/frpc.ini", "w");
+    fprintf(fp, "[common]\nserver_addr = %s\nserver_port = %d\n", serverIP, serverPort);
+    if (enableToken)
+    {
+        fprintf(fp, "token = %s\n", token);
+    }
+    if (enableKCP)
+    {
+        fprintf(fp, "protocol = kcp\n");
+    }
+    if (poolSize > 0)
+    {
+        fprintf(fp, "pool_count = %d\n", poolSize);
+    }
+
+    char hname[256] = {0};
+    gethostname(hname, sizeof(hname));
+
+    fprintf(fp, "\n[%s-%s]\ntype = %s\nlocal_ip = 127.0.0.1\nlocal_port = %d\nremote_port = %d\n", proxyName, hname, proxyType, localPort, remotePort);
+    if (enableEncryption)
+    {
+        fprintf(fp, "use_encryption=true\n");
+    }
+    if (enableCompression)
+    {
+        fprintf(fp, "use_compression=true\n");
+    }
+    fclose(fp);
+
+    if (!noExec)
+    {
+        fprintf(stderr, "Loading frpc...\n");
+        char *callArgs[] = {"The Frp Client", "-c", "/tmp/frpc.ini", NULL};
+        if (execv("/opt/frp/frpc", callArgs) < 0)
+        {
+            perror("execv");
+        }
+    }
+
+    return 0;
+}

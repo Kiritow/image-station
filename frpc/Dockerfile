@@ -1,7 +1,7 @@
 # Stage 0
 FROM ubuntu-cn:latest
 RUN apt update \
-    && apt install -y curl jq \
+    && apt install -y curl jq gcc\
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/* /var/tmp/*
 RUN cd /root \
@@ -14,11 +14,14 @@ RUN cd /root \
     && tar -xzvf frp.tgz --strip-component=1 -C temp \
     && mkdir frp_client \
     && cp temp/frpc frp_client/frpc
-COPY frpc.ini.template /root/frp_client/
-COPY start.sh /root/frp_client
-RUN chmod +x /root/frp_client/frpc /root/frp_client/start.sh
+COPY main.c /root/temp/
+RUN cd /root/temp \
+    && gcc main.c -o main \
+    && mv main /root/frp_client/launcher \
+    && chmod +x /root/frp_client/frpc \
+    && chmod +x /root/frp_client/launcher
 
 # Stage 1
 FROM ubuntu-cn:latest
 COPY --from=0 /root/frp_client /opt/frp
-ENTRYPOINT ["/opt/frp/start.sh"]
+ENTRYPOINT ["/opt/frp/launcher"]
