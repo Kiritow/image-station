@@ -2,6 +2,8 @@
 
 This is the base image of ssh server, bundled with systemd.
 
+Derived images may want to regenerate OpenSSH host keys with `rm -v /etc/ssh/ssh_host_* && ssh-keygen -A`.
+
 By default, `UsePAM` and `PasswordAuthentication` are both set to `no`.
 
 The Dockerfile contains an alternative way to setup sshd, which could leave `UsePAM` set to `yes`.
