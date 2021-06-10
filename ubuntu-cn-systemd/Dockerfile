@@ -8,6 +8,7 @@ RUN apt update \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf /tmp/* /var/tmp/* \
   && rm /root/preseed.cfg \
+  && sed 's/ProtectHostname=yes/ProtectHostname=no/g' -i /lib/systemd/system/systemd-logind.service \
   && cd /lib/systemd/system/sysinit.target.wants/ \
   && ls | grep -v systemd-tmpfiles-setup | xargs rm -f $1 \
   && rm -f /lib/systemd/system/multi-user.target.wants/* \
