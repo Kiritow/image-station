@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
         case 'p':
             if (sscanf(optarg, "%d", &poolSize) < 1)
             {
-                fprintf(stderr, "Cannot parse pool size\n");
+                fprintf(stderr, "Cannot parse pool size.\n");
                 exit(2);
             }
             break;
@@ -48,7 +48,10 @@ int main(int argc, char *argv[])
                 perror("fopen");
                 exit(2);
             }
-            fscanf(fp, "%s", token);
+            if (fscanf(fp, "%s", token) < 1) {
+                fprintf(stderr, "Cannot read token.\n");
+                exit(2);
+            }
             fclose(fp);
             enableToken = 1;
             break;
@@ -70,23 +73,29 @@ int main(int argc, char *argv[])
     serverIP = argv[optind];
     if (sscanf(argv[optind + 1], "%d", &serverPort) < 1)
     {
-        fprintf(stderr, "Cannot parse server port\n");
+        fprintf(stderr, "Cannot parse server port.\n");
         exit(2);
     }
     proxyName = argv[optind + 2];
     proxyType = argv[optind + 3];
     if (sscanf(argv[optind + 4], "%d", &localPort) < 1)
     {
-        fprintf(stderr, "Cannot parse local port\n");
+        fprintf(stderr, "Cannot parse local port.\n");
         exit(2);
     }
     if (sscanf(argv[optind + 5], "%d", &remotePort) < 1)
     {
-        fprintf(stderr, "Cannot parse remote port\n");
+        fprintf(stderr, "Cannot parse remote port.\n");
         exit(2);
     }
 
-    FILE *fp = fopen("/tmp/frpc.ini", "w");
+    char hname[256] = {0};
+    if (gethostname(hname, sizeof(hname)) < 0) {
+        fprintf(stderr, "Unable to get hostname.\n");
+        exit(2);
+    }
+
+    FILE *fp = fopen("frpc.ini", "w");
     if(!fp)
     {
         perror("fopen");
@@ -106,9 +115,6 @@ int main(int argc, char *argv[])
         fprintf(fp, "pool_count = %d\n", poolSize);
     }
 
-    char hname[256] = {0};
-    gethostname(hname, sizeof(hname));
-
     fprintf(fp, "\n[%s-%s]\ntype = %s\nlocal_ip = 127.0.0.1\nlocal_port = %d\nremote_port = %d\n", proxyName, hname, proxyType, localPort, remotePort);
     if (enableEncryption)
     {
@@ -123,8 +129,8 @@ int main(int argc, char *argv[])
     if (!noExec)
     {
         fprintf(stderr, "Loading frpc...\n");
-        char* const callArgs[] = {"frpc", "-c", "/tmp/frpc.ini", NULL};
-        if (execv("/opt/frp/frpc", callArgs) < 0)
+        char* const callArgs[] = {"frpc", "-c", "frpc.ini", NULL};
+        if (execv("/frpc", callArgs) < 0)
         {
             perror("execv");
         }

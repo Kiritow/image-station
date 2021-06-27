@@ -14,14 +14,13 @@ RUN cd /root \
     && tar -xzvf frp.tgz --strip-component=1 -C temp \
     && mkdir frp_client \
     && cp temp/frpc frp_client/frpc
-COPY launcher.c /root/temp/
-RUN cd /root/temp \
-    && gcc launcher.c -o launcher \
-    && mv launcher /root/frp_client/ \
+COPY launcher.c /tmp/
+RUN cd /tmp \
+    && gcc launcher.c -Os -s -static -o /root/frp_client/launcher \
     && chmod +x /root/frp_client/frpc \
     && chmod +x /root/frp_client/launcher
 
 # Stage 1
-FROM ubuntu-cn:latest
-COPY --from=0 /root/frp_client /opt/frp
-ENTRYPOINT ["/opt/frp/launcher"]
+FROM scratch
+COPY --from=0 /root/frp_client /
+ENTRYPOINT ["/launcher"]
