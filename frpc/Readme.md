@@ -31,3 +31,5 @@ podman run --pod=... -d -v tokenFile:/tmp/token frpc -f /tmp/token 192.168.0.1 7
 `-p PoolSize` Frp worker pool size
 
 `-f TokenFile` Use Token
+
+`-m Key=Value` Define metadata

@@ -1,6 +1,11 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
+
+#include <string>
+#include <vector>
+using namespace std;
 
 // launcher [-ezkn] [-p PoolSize] [-f TokenFilename] ServerIP ServerPort ProxyName ProxyType LocalPort RemotePort
 int main(int argc, char *argv[])
@@ -19,8 +24,9 @@ int main(int argc, char *argv[])
     int remotePort = 0;
     int enableToken = 0;
     char token[256] = {0};
+    vector<pair<string, string>> metaVec;
 
-    while ((ch = getopt(argc, argv, "ezknp:f:")) != -1)
+    while ((ch = getopt(argc, argv, "ezknm:p:f:")) != -1)
     {
         switch (ch)
         {
@@ -33,6 +39,15 @@ int main(int argc, char *argv[])
         case 'k':
             enableKCP = 1;
             break;
+        case 'm':
+            {
+                char* p = strtok(optarg, "=");
+                if(p)
+                {
+                    metaVec.emplace_back(string(optarg, p - optarg), string(p+1));
+                }
+                break;
+            }
         case 'p':
             if (sscanf(optarg, "%d", &poolSize) < 1)
             {
@@ -124,6 +139,12 @@ int main(int argc, char *argv[])
     {
         fprintf(fp, "use_compression=true\n");
     }
+
+    for(auto& pr : metaVec)
+    {
+        fprintf(fp, "meta_%s = %s\n", pr.first.c_str(), pr.second.c_str());
+    }
+
     fclose(fp);
 
     if (!noExec)

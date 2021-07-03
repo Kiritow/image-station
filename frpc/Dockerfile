@@ -1,7 +1,7 @@
 # Stage 0
 FROM ubuntu-cn:latest
 RUN apt update \
-    && apt install -y curl jq gcc\
+    && apt install -y curl jq build-essential \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/* /var/tmp/*
 RUN cd /root \
@@ -14,9 +14,9 @@ RUN cd /root \
     && tar -xzvf frp.tgz --strip-component=1 -C temp \
     && mkdir frp_client \
     && cp temp/frpc frp_client/frpc
-COPY launcher.c /tmp/
+COPY launcher.cpp /tmp/
 RUN cd /tmp \
-    && gcc launcher.c -Os -s -static -o /root/frp_client/launcher \
+    && g++ launcher.cpp -Os -s -static -o /root/frp_client/launcher \
     && chmod +x /root/frp_client/frpc \
     && chmod +x /root/frp_client/launcher
 
