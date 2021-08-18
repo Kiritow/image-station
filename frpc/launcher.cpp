@@ -150,8 +150,8 @@ int main(int argc, char *argv[])
     if (!noExec)
     {
         fprintf(stderr, "Loading frpc...\n");
-        char* const callArgs[] = {"frpc", "-c", "frpc.ini", NULL};
-        if (execv("/frpc", callArgs) < 0)
+        const char* callArgs[] = {"frpc", "-c", "frpc.ini", NULL};
+        if (execv("/frpc", (char* const*)callArgs) < 0)
         {
             perror("execv");
         }
