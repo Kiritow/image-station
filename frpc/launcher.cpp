@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     {
         fprintf(stderr, "Loading frpc...\n");
         const char* callArgs[] = {"frpc", "-c", "frpc.ini", NULL};
-        if (execv("/frpc", (char* const*)callArgs) < 0)
+        if (execv("/frpc", (char**)callArgs) < 0)
         {
             perror("execv");
         }
